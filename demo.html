@@ -1,0 +1,117 @@
+<html>
+    <head>
+<style>
+.vp {
+    overflow-x: scroll;
+    overflow-y: scroll;
+    position: absolute;
+    top: 100px;
+    left: 100px;
+    height: 300px;
+    width: 300px;
+}
+
+.rd {
+    height: 700px;
+    width: 700px;
+    background-color: blue;
+}
+
+.gd {
+    position: relative;
+    left: 300px;
+    top: 300px;
+    height: 50px;
+    width: 50px;
+    background-color: gray;
+}
+</style>
+<script type="text/javascript">
+
+function canBeSeen(element, viewPortElement=null) {
+    // hidden elements = cannot be seen
+    if(element.style.visibility === 'hidden')
+        return 'no';        
+    
+    // display none = cannot be seen
+    var r1 = element.getBoundingClientRect();
+    if(r1.width === 0 || r1.height === 0)
+        return 'no';
+        
+    var getWindowViewPort = () => {
+        // https://andylangton.co.uk/blog/development/get-viewportwindow-size-width-and-height-javascript
+        if(window.innerWidth !== undefined)
+            return { x : 0, 
+                     y : 0, 
+                     width : window.innerWidth, 
+                     height : window.innerHeight };
+
+        if(document.documentElement !== undefined)
+            return { x : 0, 
+                     y : 0, 
+                     width : document.documentElement.clientWidth, 
+                     height : document.documentElement.clientHeight };
+        
+        return { x : 0,
+                 y : 0,
+                 width : document.body.clientWidth,
+                 height : document.body.clientHeight };
+    };
+    
+    // by default element is checked against viewport
+    var r2 = getWindowViewPort();
+    if(viewPortElement !== null) {
+        r2 = viewPortElement.getBoundingClientRect();
+    }
+    
+    // whole element is visible
+    if(r1.x >= r2.x &&
+            (r1.x + r1.width) <= (r2.x + r2.width) &&
+            r1.y >= r2.y &&
+            (r1.y + r1.height) <= (r2.y + r2.height))
+        return 'yes';
+    
+    // too much right
+    var c1 = r1.x >= (r2.x + r2.width)
+    // too much left
+    var c2 = (r1.x + r1.width) <= r2.x;
+    // too much down
+    var c3 = r1.y >= (r2.y + r2.height);
+    // too much up
+    var c4 = (r1.y + r1.height) <= r2.y;
+    
+    //console.log(c1 ? 'too much right' : '');
+    //console.log(c2 ? 'too much left' : '');
+    //console.log(c3 ? 'too much down' : '');
+    //console.log(c4 ? 'too much up' : '');
+    
+    if(c1 || c2 || c3 || c4)
+        return 'no';
+    
+    return 'partially';
+}
+</script>
+
+    </head>
+    <body>
+        <p>Move the scroll bars to find the grey box. Then click the button.</p>
+        <button class="test-button">Grey box can be seen?</button>
+        <div class="vp">
+            <div class="rd">
+                <div class="gd">
+                </div>
+            </div>
+        </div>
+        
+<script type="text/javascript">
+document.addEventListener('DOMContentLoaded', () => {
+    document.querySelector('.test-button').onclick = () => {
+        var x = canBeSeen(document.querySelector('.gd'),
+                          document.querySelector('.vp'));
+        alert('grey box can be seen: ' + x.toString());
+    };
+});
+</script>
+        
+    </body>
+</html>
